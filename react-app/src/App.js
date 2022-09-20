@@ -37,13 +37,41 @@ function App() {
     }
   }
 
-  useEffect(() => {
-    setInput(file.value);
-  }, [fileName])
-  useEffect(() => {
-    console.log(book);
-    console.log(file);
-  }, [book])
+  // useEffect(() => {
+  //   setInput(file.value);
+  // }, [fileName])
+  // useEffect(() => {
+  //   console.log(book);
+  //   console.log(file);
+  // }, [book])
+
+
+  const [selectingMainChapter, setSelectingMainChapter] = useState(false);
+  const [selectingSubChapter, setSelectingSubChapter] = useState(false);
+  const [chapters, setChapters] = useState([]);
+  const [render, setRender] = useState([]);
+
+  function handleSelectingNextMain() {
+    if (selectingSubChapter) {setSelectingSubChapter(!selectingSubChapter)}
+    setSelectingMainChapter(!selectingMainChapter);
+  }
+  function handleSelectingNextSub() {
+    if (selectingMainChapter) {setSelectingMainChapter(!selectingMainChapter)}
+    setSelectingSubChapter(!selectingSubChapter);
+  }
+  function handleAddFile(file) {
+    if (selectingMainChapter) {
+      file.chapter = "main";
+      chapters.push(file);
+      console.log("pushed main");
+    }
+    if (selectingSubChapter) {
+      file.chapter = "sub";
+      chapters.push(file);
+      console.log("pushed sub");
+    }
+    setRender(!render);
+  }
 
   return (
     <div style={{display: "flex", width: "100%"}}>
@@ -51,14 +79,45 @@ function App() {
         {
           (selectingFiles && !renderBook) ? 
             <>
-              {
+              {/* {
                 Object.values(files).map((template, index) => (
                   <div key={index}>
                     <button key={index} disabled={fileName === template.name} onClick={() => handleTemplateChange(template.name)}>{template.name}</button><Checkbox checked={book.includes(`${template.name}`)} onChange={handleChange} value={template.name} />
                   </div>
                 ))
+              } */}
+              {
+                Object.values(files).map((file, index) => (
+                  <div key={index}>
+                    <button key={index} disabled={fileName === file.name} onClick={() => handleAddFile(file)}>{file.name}</button>
+                  </div>
+                ))
               }
                 <button onClick={handleBuildBook}>Build Book</button>
+                <div style={{display: "flex", flexDirection: "column", border: "3px solid black"}}>
+                  {
+                    chapters.map((chapter, index) => (
+                      chapter.chapter === "main" ?
+                        <>
+                          <p key={"label" + index} >Main: </p>
+                          <div key={index} style={{width: "100%", backgroundColor: "blue"}}>
+                            {chapter.name}
+                          </div>
+                        </>
+                      :
+                        <>
+                          <p key={"label" + index} >Sub: </p>
+                          <div key={index} style={{width: "100%", backgroundColor: "blue"}}>
+                            {chapter.name}
+                          </div>
+                        </>
+                    ))
+                  }
+                  <div style={{width: "100%"}}>
+                    <button onClick={handleSelectingNextMain} disabled={selectingMainChapter === true}>Next chapter</button>
+                    <button onClick={handleSelectingNextSub} disabled={selectingSubChapter === true}>Next subchapter</button>
+                  </div>
+                </div>
             </>
           : (!selectingFiles && !renderBook) ?
             Object.values(files).map((template, index) => (
